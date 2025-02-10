@@ -1,0 +1,123 @@
+{
+  "rules": [
+    {
+      "description": "Ensure Python functions use type hints and follow functional programming",
+      "language": "python",
+      "pattern": "def (\\w+)\\((.*?)\\):",
+      "replacement": "def $1($2) -> Any:",
+      "severity": "error"
+    },
+    {
+      "description": "Enforce async functions for I/O-bound tasks in FastAPI",
+      "language": "python",
+      "pattern": "def (\\w+)\\((.*?)\\):\\n(\\s+)await ",
+      "replacement": "async def $1($2):\n$3",
+      "severity": "error"
+    },
+    {
+      "description": "Enforce lowercase with underscores for Python file names",
+      "language": "python",
+      "pattern": "([A-Z][a-zA-Z0-9]*)\\.py",
+      "replacement": "use_snake_case.py",
+      "severity": "warning"
+    },
+    {
+      "description": "Restrict use of classes unless defining models or dependency injections",
+      "language": "python",
+      "pattern": "class (?!.*BaseModel|.*Dependency).*",
+      "replacement": "Avoid classes, use functions instead",
+      "severity": "warning"
+    },
+    {
+      "description": "Validate OAuth flow in FastAPI - use Authlib",
+      "language": "python",
+      "pattern": "import fastapi_oauth",
+      "replacement": "Use authlib for OAuth2 instead of fastapi_oauth",
+      "severity": "error"
+    },
+    {
+      "description": "Use Pydantic v2 for input validation and output schemas",
+      "language": "python",
+      "pattern": "from pydantic import BaseModel",
+      "replacement": "Ensure Pydantic v2 syntax is used for models",
+      "severity": "warning"
+    },
+    {
+      "description": "Ensure all React Native components use named exports",
+      "language": "javascript",
+      "pattern": "export default function",
+      "replacement": "export function",
+      "severity": "error"
+    },
+    {
+      "description": "Prevent inline styles in React Native; enforce Tailwind (NativeWind)",
+      "language": "javascript",
+      "pattern": "style={{.*}}",
+      "replacement": "Use Tailwind (NativeWind) instead of inline styles",
+      "severity": "warning"
+    },
+    {
+      "description": "Encourage use of JAX for vectorized ML operations",
+      "language": "python",
+      "pattern": "import numpy as np",
+      "replacement": "Use jax.numpy as jnp instead of numpy",
+      "severity": "warning"
+    },
+    {
+      "description": "Avoid explicit for-loops in ML models, use JAX vmap",
+      "language": "python",
+      "pattern": "for .* in range",
+      "replacement": "Use jax.vmap for vectorization instead of loops",
+      "severity": "error"
+    },
+    {
+      "description": "Ensure FastAPI database functions are async",
+      "language": "python",
+      "pattern": "def (.*_db)\\(.*\\):",
+      "replacement": "async def $1(...):",
+      "severity": "error"
+    },
+    {
+      "description": "Force use of AI matching function for user recommendations",
+      "language": "python",
+      "pattern": "match_users\\(.*\\)",
+      "replacement": "Use AI-driven match_users_v2() instead",
+      "severity": "warning"
+    },
+    {
+      "description": "Warn against using local database storage, enforce cloud storage",
+      "language": "python",
+      "pattern": "sqlite:///.*",
+      "replacement": "Use PostgreSQL or managed DB instead of SQLite",
+      "severity": "error"
+    },
+    {
+      "description": "Ensure all API routes have response models defined",
+      "language": "python",
+      "pattern": "@router\\.(get|post|put|delete)\\(\".*\"\\)",
+      "replacement": "Define response_model in route decorator",
+      "severity": "warning"
+    },
+    {
+      "description": "Restrict unused dependencies in package.json",
+      "language": "json",
+      "pattern": "\"dependencies\": \\{[^}]*\\}",
+      "replacement": "Remove unused dependencies in package.json",
+      "severity": "warning"
+    },
+    {
+      "description": "Use Redis caching for API-heavy endpoints",
+      "language": "python",
+      "pattern": "def .*_api\\(.*\\):",
+      "replacement": "Implement Redis caching for API-heavy routes",
+      "severity": "warning"
+    },
+    {
+      "description": "Ensure React Native navigation follows stack/tab navigation structure",
+      "language": "javascript",
+      "pattern": "import { NavigationContainer }",
+      "replacement": "Confirm NavigationContainer structure is used",
+      "severity": "warning"
+    }
+  ]
+}

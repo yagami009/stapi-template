@@ -9,6 +9,7 @@ from app.api.deps import (
     CurrentUser,
     SessionDep,
     get_current_active_superuser,
+    get_current_oauth_user,
 )
 from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
@@ -38,7 +39,6 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     """
     Retrieve users.
     """
-
     count_statement = select(func.count()).select_from(User)
     count = session.exec(count_statement).one()
 
@@ -75,6 +75,15 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
     return user
 
 
+@router.post("/oauth/{provider}", response_model=UserPublic)
+async def oauth_login(provider: str, token: str, session: SessionDep) -> Any:
+    """
+    Login via OAuth (Google, GitHub, etc.).
+    """
+    user = await get_current_oauth_user(provider, token, session)
+    return user
+
+
 @router.patch("/me", response_model=UserPublic)
 def update_user_me(
     *, session: SessionDep, user_in: UserUpdateMe, current_user: CurrentUser
@@ -82,7 +91,6 @@ def update_user_me(
     """
     Update own user.
     """
-
     if user_in.email:
         existing_user = crud.get_user_by_email(session=session, email=user_in.email)
         if existing_user and existing_user.id != current_user.id:
@@ -125,22 +133,6 @@ def read_user_me(current_user: CurrentUser) -> Any:
     return current_user
 
 
-@router.delete("/me", response_model=Message)
-def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
-    """
-    Delete own user.
-    """
-    if current_user.is_superuser:
-        raise HTTPException(
-            status_code=403, detail="Super users are not allowed to delete themselves"
-        )
-    statement = delete(Item).where(col(Item.owner_id) == current_user.id)
-    session.exec(statement)  # type: ignore
-    session.delete(current_user)
-    session.commit()
-    return Message(message="User deleted successfully")
-
-
 @router.post("/signup", response_model=UserPublic)
 def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     """
@@ -173,38 +165,6 @@ def read_user_by_id(
             detail="The user doesn't have enough privileges",
         )
     return user
-
-
-@router.patch(
-    "/{user_id}",
-    dependencies=[Depends(get_current_active_superuser)],
-    response_model=UserPublic,
-)
-def update_user(
-    *,
-    session: SessionDep,
-    user_id: uuid.UUID,
-    user_in: UserUpdate,
-) -> Any:
-    """
-    Update a user.
-    """
-
-    db_user = session.get(User, user_id)
-    if not db_user:
-        raise HTTPException(
-            status_code=404,
-            detail="The user with this id does not exist in the system",
-        )
-    if user_in.email:
-        existing_user = crud.get_user_by_email(session=session, email=user_in.email)
-        if existing_user and existing_user.id != user_id:
-            raise HTTPException(
-                status_code=409, detail="User with this email already exists"
-            )
-
-    db_user = crud.update_user(session=session, db_user=db_user, user_in=user_in)
-    return db_user
 
 
 @router.delete("/{user_id}", dependencies=[Depends(get_current_active_superuser)])
